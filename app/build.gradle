@@ -11,7 +11,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        debug{
+        debug {
             resValue "string", "places_api_key", (project.findProperty("PLACES_API_KEY") ?: "")
             resValue "string", "kakao_api_key", (project.findProperty("KAKAO_API_KEY") ?: "")
         }

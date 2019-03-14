@@ -4,5 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorBlack">#000000</color>
+    <color name="color_yanawha_sub">#204e5f</color>
+    <color name="color_yanawa_main">#f4e7d3</color>
 
 </resources>

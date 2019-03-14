@@ -3,6 +3,7 @@ package com.yanawha.osejin.yanawha;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -12,6 +13,7 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.maps.model.LatLng;
 
 import net.daum.mf.map.api.MapView;
 
@@ -55,8 +57,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                String toastMsg = String.format("Place: %s", data.toString( ));
-                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show( );
+                Place place = PlaceAutocomplete.getPlace(this, data);
+
+                if (place != null) {
+                    LatLng latLng = place.getLatLng();
+                    StringBuilder SN = new StringBuilder();
+                    SN.append("Lat="+String.valueOf(latLng.latitude));
+                    SN.append("Lng="+String.valueOf(latLng.longitude));
+                    Log.d("SN.toString()",SN.toString());
+                    Toast.makeText(this, SN.toString(), Toast.LENGTH_SHORT).show( );
+                }
             }
         }
     }
