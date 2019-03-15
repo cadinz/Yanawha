@@ -1,11 +1,16 @@
 package com.yanawha.osejin.yanawha;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -65,7 +70,9 @@ public class MainActivity extends AppCompatActivity {
                     SN.append("Lat="+String.valueOf(latLng.latitude));
                     SN.append("Lng="+String.valueOf(latLng.longitude));
                     Log.d("SN.toString()",SN.toString());
-                    Toast.makeText(this, SN.toString(), Toast.LENGTH_SHORT).show( );
+                    ViewDialog alert = new ViewDialog();
+                    alert.showDialog(MainActivity.this);
+//                    Toast.makeText(this, SN.toString(), Toast.LENGTH_SHORT).show( );
                 }
             }
         }
@@ -74,6 +81,35 @@ public class MainActivity extends AppCompatActivity {
 }
 
 
+class ViewDialog {
 
+    public void showDialog(final Activity activity) {
+        final Dialog dialog = new Dialog(activity);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.newcustom_layout);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        FrameLayout mDialogNo = dialog.findViewById(R.id.frmNo);
+        mDialogNo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(activity, "dismiss", Toast.LENGTH_SHORT).show( );
+                dialog.dismiss();
+            }
+        });
+
+        FrameLayout mDialogOk = dialog.findViewById(R.id.frmOk);
+        mDialogOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(activity,"Okay" ,Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+            }
+        });
+
+        dialog.show();
+    }
+}
 
 
