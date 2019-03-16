@@ -1,115 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="250dp"
-    android:layout_gravity="center"
-    android:layout_marginLeft="55dp"
-    android:layout_marginRight="55dp"
-    android:gravity="center"
-    android:background="@drawable/round_background"
->
+    android:layout_height="match_parent">
 
+    <android.support.v7.widget.CardView
+        android:layout_width="281dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="15dp"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="52dp"
+        tools:layout_editor_absoluteY="165dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="152dp"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical">
-
-        <android.support.v7.widget.CardView
-            android:layout_width="329dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginEnd="60dp"
-            android:layout_marginStart="60dp"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="15dp">
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="현재 위치를 추가할까요?"
+                android:textColor="@android:color/black"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_selected_place"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="20dp"
+                android:layout_marginStart="20dp"
+                android:gravity="center"
+                android:textSize="18dp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="40dp"
+                android:layout_marginBottom="7dp"
+                android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/tv_no"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/border_right"
+                    android:clickable="false"
                     android:gravity="center"
-                    android:text="Quit Earning?"
-                    android:textColor="@android:color/black"
-                    android:textSize="20dp"
+                    android:text="아니요"
+                    android:textColor="@color/color_yanawha_sub"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/tv_yes"
                     android:layout_width="match_parent"
-                    android:layout_height="71dp"
-                    android:layout_gravity="center"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginStart="20dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/border_left"
+                    android:fontFamily="sans-serif"
                     android:gravity="center"
-                    android:text="You are 400pts. away from \n unlocking rewards. quit Earning?"
-                    android:textSize="18dp"
+                    android:text="네"
+                    android:textColor="@color/color_yanawha_sub"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
 
-        </android.support.v7.widget.CardView>
-    </LinearLayout>
+        </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/frmNo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginRight="45dp"
-        android:layout_marginTop="75dp">
+    </android.support.v7.widget.CardView>
 
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@android:color/transparent"
-            app:backgroundTint="@color/colorPrimary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:elevation="6dp"
-            android:text="No"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/frmOk"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginLeft="50dp"
-        android:layout_marginTop="75dp">
-
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@android:color/transparent"
-            app:backgroundTint="@color/colorPrimary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:elevation="6dp"
-            android:text="Ok"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"></LinearLayout>
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>
