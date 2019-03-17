@@ -1,0 +1,25 @@
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <!-- Gray shadow. -->
+    <item
+        android:left="2dp"
+        android:top="2dp">
+        <shape>
+            <solid android:color="@android:color/darker_gray" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+
+    <!-- White foreground.  -->
+    <item
+        android:bottom="2dp"
+        android:right="2dp">
+        <shape>
+            <solid android:color="@color/color_yanawha_sub" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+
+</layer-list>
