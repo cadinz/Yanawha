@@ -8,6 +8,8 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
 class CustomDialog {
 
     private TextView tv_no;
@@ -15,7 +17,7 @@ class CustomDialog {
     private Dialog dialog;
     private MyDialogListener dialogListener;
 
-    CustomDialog(final Activity activity){
+    CustomDialog(@NotNull final Activity activity){
         dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);

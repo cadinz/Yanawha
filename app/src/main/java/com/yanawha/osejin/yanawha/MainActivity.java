@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
@@ -29,21 +30,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MapView.POIItemEventListener, MapView.MapViewEventListener,MapView.CurrentLocationEventListener {
+public class MainActivity extends AppCompatActivity implements MapView.POIItemEventListener, MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
 
 
-
+    private CustomProgress cp;
 
     class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
         private final View mCalloutBalloon;
 
         public CustomCalloutBalloonAdapter() {
-            mCalloutBalloon = getLayoutInflater().inflate(R.layout.custom_callout_balloon, null);
+            mCalloutBalloon = getLayoutInflater( ).inflate(R.layout.custom_callout_balloon, null);
         }
 
         @Override
         public View getCalloutBalloon(MapPOIItem poiItem) {
-            ((TextView) mCalloutBalloon.findViewById(R.id.text)).setText(poiItem.getItemName());
+            ((TextView) mCalloutBalloon.findViewById(R.id.text)).setText(poiItem.getItemName( ));
             return mCalloutBalloon;
         }
 
@@ -54,14 +55,13 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     }
 
 
-
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private MapPOIItem marker;
     private MapPoint mapPoint;
     private MapView mapView;
     private ViewGroup mapViewContainer;
 
-    private ArrayList<MapPOIItem> markers = new ArrayList<>();
+    private ArrayList<MapPOIItem> markers = new ArrayList<>( );
     final static String TAG = "MainActivity";
 
     @Override
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
         //Map view init
         mapView = new MapView(this);
-        mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter());
+        mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter( ));
         mapViewContainer = findViewById(R.id.map_view);
         mapView.setMapViewEventListener(this);
         mapView.setPOIItemEventListener(this);
@@ -80,26 +80,26 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         mapViewContainer.addView(mapView);
         MapPoint MAP_POINT_POI1 = MapPoint.mapPointWithGeoCoord(37.537229, 127.005515);
 
+        cp = new CustomProgress(MainActivity.this);
+
         findViewById(R.id.map_scale_up).setOnClickListener(v -> mapView.zoomIn(true));
         findViewById(R.id.map_scale_down).setOnClickListener(v -> mapView.zoomOut(true));
-        findViewById(R.id.map_cur_loc).setOnClickListener(v ->
-
-                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading)
-
-        );
+        findViewById(R.id.map_cur_loc).setOnClickListener(v -> {
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+                    cp.show();
+        });
 
 
         Log.d("tag", "onCreate: start go");
 
 
-
         //Search fab init
         findViewById(R.id.fab_search).setOnClickListener(v -> {
             try {
-                AutocompleteFilter autocompleteFilter = new AutocompleteFilter.Builder()
+                AutocompleteFilter autocompleteFilter = new AutocompleteFilter.Builder( )
                         .setTypeFilter(Place.TYPE_COUNTRY)
                         .setCountry("KOR")
-                        .build();
+                        .build( );
                 Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                         .setFilter(autocompleteFilter)
                         .build(MainActivity.this);
@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         });
     }
 
-    void addMarker(String selectedPlace, double lat, double lng){
-        marker = new MapPOIItem();
+    void addMarker(String selectedPlace, double lat, double lng) {
+        marker = new MapPOIItem( );
         marker.setItemName(selectedPlace);
         marker.setTag(0);
         mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
         mapView.addPOIItem(marker);
         mapView.selectPOIItem(marker, true);
-        mapView.setMapCenterPoint(marker.getMapPoint(), false);
+        mapView.setMapCenterPoint(marker.getMapPoint( ), false);
 
 
     }
@@ -142,14 +142,14 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
                     //dialog event
                     CustomDialog alert = new CustomDialog(MainActivity.this);
-                    String selectedPlace = place.getName().toString();
+                    String selectedPlace = place.getName( ).toString( );
                     alert.setTvSelectedPlace(selectedPlace);
                     alert.setDialogListener(new MyDialogListener( ) {
 
                         @Override
                         public void onPositiveClicked() {
                             //검색한 장소의 마커를 추가합니다.
-                            addMarker(selectedPlace,place.getLatLng().latitude,place.getLatLng().longitude);
+                            addMarker(selectedPlace, place.getLatLng( ).latitude, place.getLatLng( ).longitude);
                             Log.d(TAG, "onPositiveClicked: select item click");
 //                            Toast.makeText(MainActivity.this, "확인", Toast.LENGTH_SHORT).show( );
                         }
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
                         }
                     });
-                    alert.showDialog();
+                    alert.showDialog( );
 
 
                 }
@@ -174,68 +174,81 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
 
     }
+
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
 
     }
+
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
 
     }
+
     @Override
     public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewInitialized(MapView mapView) {
 
     }
+
     @Override
     public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewZoomLevelChanged(MapView mapView, int i) {
 
     }
+
     @Override
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
 
     }
+
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
         Geocoder geocoder = new Geocoder(this);
         List<Address> addresslist = null;
         try {
-            addresslist = geocoder.getFromLocation(mapPoint.getMapPointGeoCoord().latitude,mapPoint.getMapPointGeoCoord().longitude,1);
+            addresslist = geocoder.getFromLocation(mapPoint.getMapPointGeoCoord( ).latitude, mapPoint.getMapPointGeoCoord( ).longitude, 1);
         } catch (IOException e) {
             Log.e("error", "입출력 오류 - 서버에서 주소변환시 에러발생");
             e.printStackTrace( );
         }
-        if(!addresslist.isEmpty()){
+        if (!addresslist.isEmpty( )) {
 
             CustomDialog alert = new CustomDialog(MainActivity.this);
-            final String address = addresslist.get(0).getAddressLine(0).toString();
+            final String address = addresslist.get(0).getAddressLine(0).toString( );
             alert.setTvSelectedPlace(address);
 
             alert.setDialogListener(new MyDialogListener( ) {
@@ -244,10 +257,8 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                 public void onPositiveClicked() {
                     //검색한 장소의 마커를 추가합니다.
                     Log.d(TAG, "onPositiveClicked: select item click");
-                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
-                    mapView.setShowCurrentLocationMarker(false);
-                    addMarker(address,mapPoint.getMapPointGeoCoord().latitude,mapPoint.getMapPointGeoCoord().longitude);
-//                            Toast.makeText(MainActivity.this, "확인", Toast.LENGTH_SHORT).show( );
+
+                    addMarker(address, mapPoint.getMapPointGeoCoord( ).latitude, mapPoint.getMapPointGeoCoord( ).longitude);
                 }
 
                 @Override
@@ -256,7 +267,11 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
                 }
             });
-            alert.showDialog();
+            cp.dismiss( );
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+            mapView.setShowCurrentLocationMarker(false);
+            alert.showDialog( );
+
         }
 
     }
@@ -264,9 +279,11 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
     }
+
     @Override
     public void onCurrentLocationUpdateFailed(MapView mapView) {
     }
+
     @Override
     public void onCurrentLocationUpdateCancelled(MapView mapView) {
     }
