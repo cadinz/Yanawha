@@ -34,7 +34,7 @@
             <TextView
                 android:id="@+id/tv_selected_place"
                 android:layout_width="match_parent"
-                android:layout_height="46dp"
+                android:layout_height="53dp"
                 android:layout_gravity="center"
                 android:layout_marginEnd="20dp"
                 android:layout_marginStart="20dp"
@@ -44,20 +44,23 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginBottom="7dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tv_no"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginLeft="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/border_right"
                     android:clickable="false"
                     android:gravity="center"
+                    android:paddingTop="10dp"
                     android:text="아니요"
                     android:textColor="@color/color_yanawha_sub"
                     android:textSize="18sp"
@@ -66,13 +69,14 @@
                 <TextView
                     android:id="@+id/tv_yes"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginRight="5dp"
                     android:layout_weight="1"
                     android:background="@drawable/border_left"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
+                    android:paddingTop="10dp"
                     android:text="네"
                     android:textColor="@color/color_yanawha_sub"
                     android:textSize="18sp"

@@ -1,5 +1,6 @@
 package com.yanawha.osejin.yanawha;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -34,6 +35,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Query;
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements MapView.POIItemEventListener, MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
 
@@ -68,8 +71,19 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     final static String TAG = "MainActivity";
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("Sunflower-Medium.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .build());
+
         setContentView(R.layout.activity_main);
 
         Retrofit retro = new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
