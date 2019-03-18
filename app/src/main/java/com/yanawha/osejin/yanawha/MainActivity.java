@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,13 +17,10 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.maps.model.LatLng;
 
 import net.daum.mf.map.api.CalloutBalloonAdapter;
-import net.daum.mf.map.api.CameraUpdateFactory;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
-import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
 import java.io.IOException;
@@ -31,9 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MapView.POIItemEventListener, MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
-
-
-    private CustomProgress cp;
 
     class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
         private final View mCalloutBalloon;
@@ -54,6 +48,9 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         }
     }
 
+    private CustomProgress cp;
+    private Button btnSearchCenter;
+
 
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private MapPOIItem marker;
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     private MapView mapView;
     private ViewGroup mapViewContainer;
 
-    private ArrayList<MapPOIItem> markers = new ArrayList<>( );
+    private ArrayList<MarkerInfo> markers = new ArrayList<>( );
     final static String TAG = "MainActivity";
 
     @Override
@@ -76,11 +73,16 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         mapView.setMapViewEventListener(this);
         mapView.setPOIItemEventListener(this);
         mapView.setCurrentLocationEventListener(this);
-
         mapViewContainer.addView(mapView);
-        MapPoint MAP_POINT_POI1 = MapPoint.mapPointWithGeoCoord(37.537229, 127.005515);
 
+
+        //custom Progree
         cp = new CustomProgress(MainActivity.this);
+
+        //init buttons
+        btnSearchCenter.findViewById(R.id.btn_search_center).setVisibility(View.GONE);
+//        btnSearchCenter.setOnClickListener(view -> );
+
 
         findViewById(R.id.map_scale_up).setOnClickListener(v -> mapView.zoomIn(true));
         findViewById(R.id.map_scale_down).setOnClickListener(v -> mapView.zoomOut(true));
@@ -110,11 +112,11 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         });
     }
 
-    void addMarker(String selectedPlace, double lat, double lng) {
+    void addMarker(MarkerInfo markerinfo) {
         marker = new MapPOIItem( );
-        marker.setItemName(selectedPlace);
+        marker.setItemName(markerinfo.getPlace());
         marker.setTag(0);
-        mapPoint = MapPoint.mapPointWithGeoCoord(lat, lng);
+        mapPoint = MapPoint.mapPointWithGeoCoord(markerinfo.getLat(), markerinfo.getLng());
         marker.setMapPoint(mapPoint);
         // 기본으로 제공하는 BluePin 마커 모양.
         marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
@@ -122,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
 
         //ArrayList marker 추가
-        markers.add(marker);
+        markers.add(markerinfo);
 
         mapView.addPOIItem(marker);
         mapView.selectPOIItem(marker, true);
@@ -131,6 +133,18 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
     }
 
+    private MarkerInfo computeCentroid(List<MarkerInfo> points) {
+        double latitude = 0;
+        double longitude = 0;
+        int n = points.size();
+
+        for (MarkerInfo point : points) {
+            latitude += point.getLat();
+            longitude += point.getLng();
+        }
+
+        return new MarkerInfo(latitude/n, longitude/n);
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -149,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                         @Override
                         public void onPositiveClicked() {
                             //검색한 장소의 마커를 추가합니다.
-                            addMarker(selectedPlace, place.getLatLng( ).latitude, place.getLatLng( ).longitude);
+                            addMarker(new MarkerInfo(selectedPlace, place.getLatLng( ).latitude, place.getLatLng( ).longitude));
                             Log.d(TAG, "onPositiveClicked: select item click");
 //                            Toast.makeText(MainActivity.this, "확인", Toast.LENGTH_SHORT).show( );
                         }
@@ -258,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                     //검색한 장소의 마커를 추가합니다.
                     Log.d(TAG, "onPositiveClicked: select item click");
 
-                    addMarker(address, mapPoint.getMapPointGeoCoord( ).latitude, mapPoint.getMapPointGeoCoord( ).longitude);
+                    addMarker(new MarkerInfo(address, mapPoint.getMapPointGeoCoord().latitude, mapPoint.getMapPointGeoCoord().longitude));
                 }
 
                 @Override
@@ -275,7 +289,6 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         }
 
     }
-
     @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
     }

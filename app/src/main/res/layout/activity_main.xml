@@ -63,20 +63,46 @@
         app:srcCompat="@drawable/baseline_remove_black_36" />
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:gravity="bottom"
+        android:orientation="vertical">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/places_ic_search"
-        android:tint="@color/colorBlack"
-        app:backgroundTint="@color/color_yanawha_main"
-        app:fabSize="normal"
-        app:rippleColor="@color/color_yanawha_sub" />
+        <Button
+            android:id="@+id/btn_search_center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="17dp"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="100dp"
+            android:background="@drawable/click_selector"
+            android:gravity="center_horizontal|center"
+            android:text="중간지역 찾기" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|right"
+        android:orientation="vertical">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/places_ic_search"
+            android:tint="@color/colorBlack"
+            app:backgroundTint="@color/color_yanawha_main"
+            app:elevation="6dp"
+            app:fabSize="normal"
+            app:rippleColor="@color/color_yanawha_sub"
+            app:useCompatPadding="true"/>
+    </LinearLayout>
+
 
 
 </RelativeLayout>
