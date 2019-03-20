@@ -2,6 +2,7 @@ package com.yanawha.osejin.yanawha;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -12,52 +13,33 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import net.daum.mf.map.api.CalloutBalloonAdapter;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Query;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements MapView.POIItemEventListener, MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
 
-    class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
-        private final View mCalloutBalloon;
 
-        public CustomCalloutBalloonAdapter() {
-            mCalloutBalloon = getLayoutInflater( ).inflate(R.layout.custom_callout_balloon, null);
-        }
-
-        @Override
-        public View getCalloutBalloon(MapPOIItem poiItem) {
-            ((TextView) mCalloutBalloon.findViewById(R.id.text)).setText(poiItem.getItemName( ));
-            return mCalloutBalloon;
-        }
-
-        @Override
-        public View getPressedCalloutBalloon(MapPOIItem poiItem) {
-            return null;
-        }
-    }
 
     private CustomProgress cp;
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
@@ -68,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     private Button btnSearchCenter;
 
     private ArrayList<MarkerInfo> markers = new ArrayList<>( );
+    private ArrayList<MarkerInfo> centermarkers = new ArrayList<>( );
+
     final static String TAG = "MainActivity";
 
     @Override
@@ -75,39 +59,19 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
 
     }
+    private void initDefaultFont(){
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("Sunflower-Medium.ttf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
-                        .setDefaultFontPath("Sunflower-Medium.ttf")
-                        .setFontAttrId(R.attr.fontPath)
-                        .build());
-
         setContentView(R.layout.activity_main);
+        initDefaultFont();
 
-        Retrofit retro = new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(RetrofitService.base)
-                .build();
-        RetrofitService api = retro.create(RetrofitService.class);
-
-        Call<JsonObject> call = api.getAddress("맛집",
-                                        "FD6","127.066737","37.609453",
-                                                3);
-        call.enqueue(new Callback<JsonObject>( ) {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-
-                Toast.makeText(MainActivity.this, "good", Toast.LENGTH_SHORT).show( );
-                Log.d(TAG, "onResponse: "+response.body());
-
-            }
-
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-
-            }
-        });
 
 
         //Map view init
@@ -119,14 +83,37 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         mapView.setCurrentLocationEventListener(this);
         mapViewContainer.addView(mapView);
 
-
         //custom Progress
         cp = new CustomProgress(MainActivity.this);
 
-        //init buttons
+        //init Search Center buttons
         btnSearchCenter = findViewById(R.id.btn_search_center);
-//        btnSearchCenter.setVisibility(View.GONE);
-//        btnSearchCenter.setOnClickListener(view -> );
+        btnSearchCenter.setVisibility(View.GONE);
+
+        btnSearchCenter.setOnClickListener(new View.OnClickListener( ) {
+            @Override
+            public void onClick(View view) {
+
+
+                MarkerInfo marker = computeCentroid(markers);
+
+
+                CenterInfoManager centerInfoManager = new CenterInfoManager();
+
+                centerInfoManager.getLocationInfo(new DataCallback( ) {
+                    @Override
+                    public void DataCallback(JsonObject itemlist) {
+                        Gson gson = new Gson();
+                        MarkerInfo[] array = gson.fromJson(itemlist.get("documents"), MarkerInfo[].class);
+                        List<MarkerInfo> list = Arrays.asList(array);
+                        addCenterMarker(list);
+                    }
+                }, new MarkerInfo(marker.getLat(), marker.getLng()), CenterInfoManager.Code.RESTAURANT, "맛집", 3);
+            }
+        });
+
+
+
 
 
         findViewById(R.id.map_scale_up).setOnClickListener(v -> mapView.zoomIn(true));
@@ -137,11 +124,15 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         });
 
 
+
         Log.d("tag", "onCreate: start go");
 
 
         //Search fab init
         findViewById(R.id.fab_search).setOnClickListener(v -> {
+
+            Toast.makeText(this, new SingletonData().getResult().toString(), Toast.LENGTH_SHORT).show( );
+
             try {
                 AutocompleteFilter autocompleteFilter = new AutocompleteFilter.Builder( )
                         .setTypeFilter(Place.TYPE_COUNTRY)
@@ -175,6 +166,36 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         mapView.selectPOIItem(marker, true);
         mapView.setMapCenterPoint(marker.getMapPoint( ), false);
 
+        if(markers.size()>=2){
+            btnSearchCenter.setVisibility(View.VISIBLE);
+        }else{
+            btnSearchCenter.setVisibility(View.GONE);
+        }
+    }
+
+    void addCenterMarker(List<MarkerInfo> markerinfo) {
+
+
+
+        for (MarkerInfo mk: markerinfo) {
+
+            marker = new MapPOIItem( );
+            marker.setItemName(mk.getPlace());
+            marker.setTag(0);
+            //data를 잘못받아넣음 lat lng 바뀜
+            mapPoint = MapPoint.mapPointWithGeoCoord(mk.getLng(), mk.getLat());
+            marker.setMapPoint(mapPoint);
+            // 기본으로 제공하는 BluePin 마커 모양.
+            marker.setMarkerType(MapPOIItem.MarkerType.CustomImage); // 마커타입을 커스텀 마커로 지정.
+            marker.setCustomImageResourceId(R.drawable.custom_marker_star);
+            marker.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
+            //ArrayList marker 추가
+            centermarkers.add(mk);
+            mapView.addPOIItem(marker);
+            mapView.selectPOIItem(marker, true);
+            mapView.setMapCenterPoint(marker.getMapPoint( ), false);
+
+        }
 
     }
 
@@ -189,6 +210,48 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         }
 
         return new MarkerInfo(latitude/n, longitude/n);
+    }
+
+
+    @Override
+    public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
+        Geocoder geocoder = new Geocoder(this);
+        List<Address> addresslist = null;
+        try {
+            addresslist = geocoder.getFromLocation(mapPoint.getMapPointGeoCoord( ).latitude, mapPoint.getMapPointGeoCoord( ).longitude, 1);
+        } catch (IOException e) {
+            Log.e("error", "입출력 오류 - 서버에서 주소변환시 에러발생");
+            e.printStackTrace( );
+        }
+        if (!addresslist.isEmpty( )) {
+
+            CustomDialog alert = new CustomDialog(MainActivity.this);
+            final String address = addresslist.get(0).getAddressLine(0).toString( );
+            alert.setTvSelectedPlace(address);
+
+            alert.setDialogListener(new MyDialogListener( ) {
+
+                @Override
+                public void onPositiveClicked() {
+                    //검색한 장소의 마커를 추가합니다.
+                    Log.d(TAG, "onPositiveClicked: select item click");
+
+                    addMarker(new MarkerInfo(address, mapPoint.getMapPointGeoCoord().latitude, mapPoint.getMapPointGeoCoord().longitude));
+                }
+
+                @Override
+                public void onNegativeClicked() {
+                    Log.d(TAG, "onPositiveClicked: unselect item click");
+
+                }
+            });
+            cp.dismiss( );
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+            mapView.setShowCurrentLocationMarker(false);
+            alert.showDialog( );
+
+        }
+
     }
 
     @Override
@@ -227,7 +290,6 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
             }
         }
     }
-
 
     @Override
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
@@ -295,46 +357,6 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     }
 
     @Override
-    public void onCurrentLocationUpdate(MapView mapView, MapPoint mapPoint, float v) {
-        Geocoder geocoder = new Geocoder(this);
-        List<Address> addresslist = null;
-        try {
-            addresslist = geocoder.getFromLocation(mapPoint.getMapPointGeoCoord( ).latitude, mapPoint.getMapPointGeoCoord( ).longitude, 1);
-        } catch (IOException e) {
-            Log.e("error", "입출력 오류 - 서버에서 주소변환시 에러발생");
-            e.printStackTrace( );
-        }
-        if (!addresslist.isEmpty( )) {
-
-            CustomDialog alert = new CustomDialog(MainActivity.this);
-            final String address = addresslist.get(0).getAddressLine(0).toString( );
-            alert.setTvSelectedPlace(address);
-
-            alert.setDialogListener(new MyDialogListener( ) {
-
-                @Override
-                public void onPositiveClicked() {
-                    //검색한 장소의 마커를 추가합니다.
-                    Log.d(TAG, "onPositiveClicked: select item click");
-
-                    addMarker(new MarkerInfo(address, mapPoint.getMapPointGeoCoord().latitude, mapPoint.getMapPointGeoCoord().longitude));
-                }
-
-                @Override
-                public void onNegativeClicked() {
-                    Log.d(TAG, "onPositiveClicked: unselect item click");
-
-                }
-            });
-            cp.dismiss( );
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
-            mapView.setShowCurrentLocationMarker(false);
-            alert.showDialog( );
-
-        }
-
-    }
-    @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
     }
 
@@ -345,6 +367,27 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     @Override
     public void onCurrentLocationUpdateCancelled(MapView mapView) {
     }
+
+    class CustomCalloutBalloonAdapter implements CalloutBalloonAdapter {
+        private final View mCalloutBalloon;
+
+        public CustomCalloutBalloonAdapter() {
+            mCalloutBalloon = getLayoutInflater( ).inflate(R.layout.custom_callout_balloon, null);
+        }
+
+        @Override
+        public View getCalloutBalloon(MapPOIItem poiItem) {
+            ((TextView) mCalloutBalloon.findViewById(R.id.text)).setText(poiItem.getItemName( ));
+            return mCalloutBalloon;
+        }
+
+        @Override
+        public View getPressedCalloutBalloon(MapPOIItem poiItem) {
+            return null;
+        }
+    }
+
+
 }
 
 
