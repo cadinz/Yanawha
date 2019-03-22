@@ -24,6 +24,7 @@ public class CenterInfoManager{
     public enum Code {
 
         RESTAURANT("FD6"),
+        CAFE("CE7"),
         CONVENIENCESTORE("CS2");
         String code;
 
@@ -50,7 +51,7 @@ public class CenterInfoManager{
             RetrofitService api = retro.create(RetrofitService.class);
 
             Call<JsonObject> call = api.getAddress(query,
-                    code.codeToString( ), markerinfo.getLng( ) + "", markerinfo.getLat( ) + "",
+                    code.codeToString(), markerinfo.getLng( ) + "", markerinfo.getLat( ) + "",
                     size);
         Callback callback = new Callback<JsonObject>( ) {
                 @Override

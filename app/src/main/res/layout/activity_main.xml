@@ -80,7 +80,7 @@
             android:layout_marginRight="100dp"
             android:background="@drawable/click_selector"
             android:gravity="center_horizontal|center"
-            android:text="중간지역 찾기" />
+            android:text="중간지역찾기" />
 
     </LinearLayout>
 

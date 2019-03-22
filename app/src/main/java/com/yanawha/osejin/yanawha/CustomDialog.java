@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +20,7 @@ class CustomDialog {
         dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
-        dialog.setContentView(R.layout.newcustom_layout);
+        dialog.setContentView(R.layout.custom_dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
     }
 
@@ -29,9 +28,24 @@ class CustomDialog {
         this.dialogListener = dialogListener;
     }
 
-    public void setTvSelectedPlace(String selectedPlace){
-        TextView tv_selected_place = dialog.findViewById(R.id.tv_selected_place);
-        tv_selected_place.setText(selectedPlace);
+    public void setDialogTitle(String title){
+        TextView tv_title = dialog.findViewById(R.id.tv_title);
+        tv_title.setText(title);
+    }
+
+    public void setDialogContent(String content){
+        TextView tv_selected_place = dialog.findViewById(R.id.tv_content);
+        tv_selected_place.setText(content);
+    }
+
+    public void setDialogYes(String content){
+        TextView tv_yes = dialog.findViewById(R.id.tv_yes);
+        tv_yes.setText(content);
+    }
+
+    public void setDialogNo(String content){
+        TextView tv_no = dialog.findViewById(R.id.tv_no);
+        tv_no.setText(content);
     }
 
     public void showDialog() {
@@ -52,7 +66,6 @@ class CustomDialog {
             @Override
             public void onClick(View v) {
                 dialogListener.onPositiveClicked();
-
                 dialog.cancel();
             }
         });

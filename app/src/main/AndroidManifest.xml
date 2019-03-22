@@ -23,6 +23,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".WebDialog"
+            android:theme="@android:style/Theme.Dialog"
+            android:windowSoftInputMode="stateHidden" android:configChanges="orientation|keyboardHidden">
+        </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/places_api_key" />
