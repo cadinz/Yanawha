@@ -514,22 +514,3 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
 
 }
-
-
-
-
-class Holder<T> {
-    private T value;
-
-    Holder(T value) {
-        setValue(value);
-    }
-
-    T getValue() {
-        return value;
-    }
-
-    void setValue(T value) {
-        this.value = value;
-    }
-}
