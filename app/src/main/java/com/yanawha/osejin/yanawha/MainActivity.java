@@ -51,10 +51,9 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     private MapView mapView;
     private ViewGroup mapViewContainer;
     private Button btnSearchCenter;
-
     private ArrayList<MarkerInfo> markers = new ArrayList<>( );
     private ArrayList<MarkerInfo> centermarkers = new ArrayList<>( );
-
+    private TextView tvTotalParticipants;
     final static String TAG = "MainActivity";
 
     @Override
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
         //custom Progress
         cp = new CustomProgress(MainActivity.this);
-
+        tvTotalParticipants = findViewById(R.id.tv_total_participants);
         //init Search Center buttons
         btnSearchCenter = findViewById(R.id.btn_search_center);
         btnSearchCenter.setVisibility(View.GONE);
@@ -156,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                         mapView.removeAllPOIItems( );
                         mapView.refreshMapTiles( );
                         btnSearchCenter.setVisibility(View.GONE);
+                        tvTotalParticipants.setText("참가자:"+markers.size());
                     }
 
                 }
@@ -289,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         } else {
             btnSearchCenter.setVisibility(View.GONE);
         }
+        tvTotalParticipants.setText("참가자:"+markers.size());
     }
 
     //중간위치의 정보들을 받아 마커를 추가한다

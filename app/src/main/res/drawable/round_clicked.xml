@@ -17,7 +17,7 @@
         android:bottom="2dp"
         android:right="2dp">
         <shape>
-            <solid android:color="@color/color_yanawha_main" />
+            <solid android:color="#FFAD37" />
             <corners android:radius="6dp" />
         </shape>
     </item>

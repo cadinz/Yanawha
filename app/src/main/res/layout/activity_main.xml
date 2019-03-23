@@ -63,6 +63,18 @@
         app:srcCompat="@drawable/baseline_remove_black_36" />
 
 
+    <TextView
+        android:id="@+id/tv_total_participants"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:text="참여자 : 0"
+        android:textAlignment="center"
+        android:textColor="#FF5816"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -96,10 +108,10 @@
             android:layout_height="wrap_content"
             android:src="@drawable/places_ic_search"
             android:tint="@color/colorBlack"
-            app:backgroundTint="@color/color_yanawha_main"
+            app:backgroundTint="#FF5816"
             app:elevation="6dp"
             app:fabSize="normal"
-            app:rippleColor="@color/color_yanawha_sub"
+            app:rippleColor="#FF3D01"
             app:useCompatPadding="true"/>
     </LinearLayout>
 

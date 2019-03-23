@@ -2,6 +2,7 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,7 +14,9 @@
         app:cardElevation="15dp"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="52dp"
-        tools:layout_editor_absoluteY="165dp">
+        tools:layout_editor_absoluteY="165dp"
+        app:cardBackgroundColor="#FFEB3B"
+        >
 
         <LinearLayout
             android:layout_width="match_parent"

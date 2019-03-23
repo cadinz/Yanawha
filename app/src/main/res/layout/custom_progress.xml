@@ -6,8 +6,8 @@
     android:background="@android:color/transparent"
     app:duration="1000"
     app:hasHole="false"
-    app:lineColor="@color/color_yanawha_sub"
+    app:lineColor="#FF3D01"
     app:maxLineLength="0.8"
-    app:minLineLength="0.4"
+    app:minLineLength="0.5"
     app:sizeMultiplier="1"
     app:strokeWidth="7dp" />
