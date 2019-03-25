@@ -32,11 +32,11 @@ public class MarkerInfo {
         return y;
     }
 
-    public String getPlace() {
+    public String getPlaceName() {
         return place_name;
     }
 
-    public String getimageURL() {
+    public String getPlaceURL() {
         return place_url;
     }
 

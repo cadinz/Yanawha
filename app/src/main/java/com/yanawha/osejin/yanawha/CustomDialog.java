@@ -66,7 +66,7 @@ class CustomDialog {
             @Override
             public void onClick(View v) {
                 dialogListener.onPositiveClicked();
-                dialog.cancel();
+                dialog.dismiss();
             }
         });
 

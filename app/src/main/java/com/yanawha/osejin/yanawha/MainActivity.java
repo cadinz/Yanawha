@@ -1,5 +1,6 @@
 package com.yanawha.osejin.yanawha;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,16 +8,25 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,10 +85,6 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         setContentView(R.layout.activity_main);
         initDefaultFont( );
 
-
-
-
-        //Map view init
         mapView = new MapView(this);
         mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter( ));
         mapViewContainer = findViewById(R.id.map_view);
@@ -96,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
         final String[] keyword = {""};
         final CenterInfoManager.Code[] code = {null};
+
 
         btnSearchCenter.setOnClickListener(new View.OnClickListener( ) {
             @Override
@@ -146,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                                 }, new MarkerInfo(marker.getLat( ), marker.getLng( )), code[0], keyword[0], 8);
                             }
                         });
-                        alert2.showDialog();
+                        alert2.showDialog( );
                         break;
 
                     }
@@ -155,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                         mapView.removeAllPOIItems( );
                         mapView.refreshMapTiles( );
                         btnSearchCenter.setVisibility(View.GONE);
-                        tvTotalParticipants.setText("참가자:"+markers.size());
+                        tvTotalParticipants.setText("참가자:" + markers.size( ));
                     }
 
                 }
@@ -163,17 +170,41 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
             }
         });
 
+        LocationManager locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
 
         findViewById(R.id.map_scale_up).setOnClickListener(v -> mapView.zoomIn(true));
         findViewById(R.id.map_scale_down).setOnClickListener(v -> mapView.zoomOut(true));
         findViewById(R.id.map_cur_loc).setOnClickListener(v -> {
-            //찾은뒤 onCurrentLocationUpdate 호출됨
-            cp.show( );
-            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+
+            if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                CustomDialog dialog = new CustomDialog(this);
+                dialog.setDialogTitle("GPS가 꺼져있습니다.");
+                dialog.setDialogContent("예를 누르면 설정창으로 이동합니다.");
+                dialog.setDialogNo("아니요");
+                dialog.setDialogYes("예");
+                dialog.setDialogListener(new MyDialogListener( ) {
+                    @Override
+                    public void onPositiveClicked() {
+                        //GPS 설정화면으로 이동
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        intent.addCategory(Intent.CATEGORY_DEFAULT);
+                        startActivity(intent);
+                        return;
+                    }
+
+                    @Override
+                    public void onNegativeClicked() {
+                        return;
+                    }
+                });
+                dialog.showDialog();
+            }else {
+                cp.show( );
+                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+            }
         });
 
 
-        Log.d("tag", "onCreate: start go");
 
 
         //Search fab init
@@ -194,73 +225,72 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         });
     }
 
+
     void showWebViewDialogAsUrl(String url) {
         cp.show( );
         AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create( );
-
-
         WebView wv = new WebView(this);
+        LinearLayout wrapper = new LinearLayout(this);
+        EditText keyboardHack = new EditText(this);
+        keyboardHack.setVisibility(View.GONE);
         wv.getSettings( ).setJavaScriptEnabled(true);
-        wv.loadUrl(url);
-        alert.setView(wv);
-        wv.setWebViewClient(new WebViewClient( ) {
-            Boolean flag = false;
-            Boolean showflag = true;
+        wv.setFocusable(true);
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+        wrapper.addView(wv, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        wrapper.addView(keyboardHack, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        WebViewClient webViewClient = new WebViewClient( ) {
+            Boolean flag = true;
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (showflag) {
+
+
+                if(view.getCertificate() != null && view.getOriginalUrl() != null) {
                     alert.show( );
-                    showflag = false;
+                    cp.dismiss( );
                 }
-                cp.dismiss( );
                 super.onPageFinished(view, url);
-                flag = false;
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
+
+                Log.d(TAG, "                ----onPageStarted: " + url);
                 super.onPageStarted(view, url, favicon);
-                flag = true;
             }
+
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
-                int type = view.getHitTestResult( ).getType( );
-                Log.d(TAG, "(WEBVIEW)shouldOverrideUrlLoading : " + url);
-                Log.d(TAG, "     - getURLLoding Type:" + type);
+                Log.d(TAG, "                ----shouldOverrideUrlLoading: " + url);
 
-                if (!flag) {
-                    if (type > 0) {
-                        if (url.startsWith("http:") || url.startsWith("https:")) {
-                            view.loadUrl(url);
-                            return true;
-                        }
-                        // tel일경우 아래와 같이 처리해준다.
-                        else if (url.startsWith("tel:")) {
-                            Intent tel = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
-                            startActivity(tel);
-                            return true;
-                        }
-                    } else {
-                        Log.d(TAG, "     - startLoading...:loadUrl pass!!");
-                        return false;
-                    }
-                } else {
-                    Log.d(TAG, "     - under Loading... (SKIP...) ");
-                    return false;
+                flag = false;
+
+                if (url.startsWith("http:") || url.startsWith("https:")) {
+                    view.loadUrl(url);
+                    return true;
+                }
+                // tel일경우 아래와 같이 처리해준다.
+                else if (url.startsWith("tel:")) {
+                    Intent tel = new Intent(Intent.ACTION_DIAL, Uri.parse(url));
+                    startActivity(tel);
+                    return true;
                 }
                 return false;
             }
-        });
+        };
+        wv.setWebViewClient(webViewClient);
+        wv.loadUrl(url);
+        alert.setView(wrapper);
         alert.setButton(AlertDialog.BUTTON_NEGATIVE, "close", new DialogInterface.OnClickListener( ) {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss( );
             }
         });
-        alert.hide( );
+        alert.show();
+        alert.hide();
 
 
     }
@@ -268,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     //마커를 추가한다 (장소이름, 위경도)
     void addMarker(MarkerInfo markerinfo) {
         marker = new MapPOIItem( );
-        marker.setItemName(markerinfo.getPlace( ));
+        marker.setItemName(markerinfo.getPlaceName( ));
         marker.setTag(0);
         mapPoint = MapPoint.mapPointWithGeoCoord(markerinfo.getLat( ), markerinfo.getLng( ));
         marker.setMapPoint(mapPoint);
@@ -289,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         } else {
             btnSearchCenter.setVisibility(View.GONE);
         }
-        tvTotalParticipants.setText("참가자:"+markers.size());
+        tvTotalParticipants.setText("참여자 : " + markers.size( ));
     }
 
     //중간위치의 정보들을 받아 마커를 추가한다
@@ -299,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         for (MarkerInfo mk : markerinfo) {
 
             marker = new MapPOIItem( );
-            marker.setItemName(mk.getPlace( ));
+            marker.setItemName(mk.getPlaceName( ));
             marker.setTag(0);
             //data를 잘못받아넣음 lat lng 바뀜
             mapPoint = MapPoint.mapPointWithGeoCoord(mk.getLng( ), mk.getLat( ));
@@ -425,6 +455,11 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
 
+        for (MarkerInfo marker : centermarkers) {
+            if (marker.getPlaceName( ).equals(mapPOIItem.getItemName( ))) {
+                showWebViewDialogAsUrl(marker.getPlaceURL( ));
+            }
+        }
     }
 
     @Override
