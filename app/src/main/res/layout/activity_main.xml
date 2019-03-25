@@ -110,13 +110,13 @@
             android:id="@+id/fab_search"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/places_ic_search"
+            android:src="@android:drawable/ic_search_category_default"
             android:tint="@color/colorBlack"
             app:backgroundTint="#FF5816"
             app:elevation="6dp"
             app:fabSize="normal"
             app:rippleColor="#FF3D01"
-            app:useCompatPadding="true"/>
+            app:useCompatPadding="true" />
     </LinearLayout>
 
 

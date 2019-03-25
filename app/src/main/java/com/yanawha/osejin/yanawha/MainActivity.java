@@ -30,11 +30,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -84,6 +92,13 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initDefaultFont( );
+
+
+        Places.initialize(getApplicationContext( ), BuildConfig.DEBUG_PLACES_API_KEY);
+
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
+
 
         mapView = new MapView(this);
         mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter( ));
@@ -170,13 +185,13 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
             }
         });
 
-        LocationManager locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         findViewById(R.id.map_scale_up).setOnClickListener(v -> mapView.zoomIn(true));
         findViewById(R.id.map_scale_down).setOnClickListener(v -> mapView.zoomOut(true));
         findViewById(R.id.map_cur_loc).setOnClickListener(v -> {
 
-            if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 CustomDialog dialog = new CustomDialog(this);
                 dialog.setDialogTitle("GPS가 꺼져있습니다.");
                 dialog.setDialogContent("예를 누르면 설정창으로 이동합니다.");
@@ -197,31 +212,23 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                         return;
                     }
                 });
-                dialog.showDialog();
-            }else {
+                dialog.showDialog( );
+            } else {
                 cp.show( );
                 mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
             }
         });
 
 
-
-
         //Search fab init
         findViewById(R.id.fab_search).setOnClickListener(v -> {
-
-            try {
-                AutocompleteFilter autocompleteFilter = new AutocompleteFilter.Builder( )
-                        .setTypeFilter(Place.TYPE_COUNTRY)
-                        .setCountry("KOR")
-                        .build( );
-                Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                        .setFilter(autocompleteFilter)
-                        .build(MainActivity.this);
-                startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-            } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-                Toast.makeText(MainActivity.this, "검색을 사용할 수 없습니다", Toast.LENGTH_SHORT).show( );
-            }
+            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
+        // Start the autocomplete intent.
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.OVERLAY, fields)
+                    .setCountry("KOR")
+                    .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
         });
     }
 
@@ -245,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
             public void onPageFinished(WebView view, String url) {
 
 
-                if(view.getCertificate() != null && view.getOriginalUrl() != null) {
+                if (view.getCertificate( ) != null && view.getOriginalUrl( ) != null) {
                     alert.show( );
                     cp.dismiss( );
                 }
@@ -289,8 +296,8 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                 dialog.dismiss( );
             }
         });
-        alert.show();
-        alert.hide();
+        alert.show( );
+        alert.hide( );
 
 
     }
@@ -414,7 +421,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                final Place place = PlaceAutocomplete.getPlace(this, data);
+                Place place = Autocomplete.getPlaceFromIntent(data);
 
                 if (place != null) {
 
@@ -440,7 +447,6 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
                         }
                     });
                     alert.showDialog( );
-
 
                 }
             }
