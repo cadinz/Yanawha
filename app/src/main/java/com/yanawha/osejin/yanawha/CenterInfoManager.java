@@ -1,22 +1,11 @@
 package com.yanawha.osejin.yanawha;
 
-import android.os.AsyncTask;
-import android.util.Log;
-
 import com.google.gson.JsonObject;
-
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
-
-import okhttp3.internal.platform.Platform;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class CenterInfoManager{
 

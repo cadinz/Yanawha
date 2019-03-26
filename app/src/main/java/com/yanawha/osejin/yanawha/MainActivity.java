@@ -1,9 +1,14 @@
 package com.yanawha.osejin.yanawha;
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
@@ -14,8 +19,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -52,6 +60,8 @@ import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
     private ArrayList<MarkerInfo> markers = new ArrayList<>( );
     private ArrayList<MarkerInfo> centermarkers = new ArrayList<>( );
     private TextView tvTotalParticipants;
+    private final int REQUEST_PERMISSION = 1;
     final static String TAG = "MainActivity";
 
     @Override
@@ -94,11 +105,10 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         initDefaultFont( );
 
 
-        Places.initialize(getApplicationContext( ), BuildConfig.DEBUG_PLACES_API_KEY);
+        Places.initialize(getApplicationContext( ), BuildConfig.PLACES_API_KEY);
 
         // Create a new Places client instance.
         PlacesClient placesClient = Places.createClient(this);
-
 
         mapView = new MapView(this);
         mapView.setCalloutBalloonAdapter(new CustomCalloutBalloonAdapter( ));
@@ -106,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         mapView.setMapViewEventListener(this);
         mapView.setPOIItemEventListener(this);
         mapView.setCurrentLocationEventListener(this);
+        mapView.setHDMapTileEnabled(true);
         mapViewContainer.addView(mapView);
 
         //custom Progress
@@ -191,39 +202,54 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         findViewById(R.id.map_scale_down).setOnClickListener(v -> mapView.zoomOut(true));
         findViewById(R.id.map_cur_loc).setOnClickListener(v -> {
 
-            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                CustomDialog dialog = new CustomDialog(this);
-                dialog.setDialogTitle("GPS가 꺼져있습니다.");
-                dialog.setDialogContent("예를 누르면 설정창으로 이동합니다.");
-                dialog.setDialogNo("아니요");
-                dialog.setDialogYes("예");
-                dialog.setDialogListener(new MyDialogListener( ) {
-                    @Override
-                    public void onPositiveClicked() {
-                        //GPS 설정화면으로 이동
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        intent.addCategory(Intent.CATEGORY_DEFAULT);
-                        startActivity(intent);
-                        return;
-                    }
 
-                    @Override
-                    public void onNegativeClicked() {
-                        return;
-                    }
-                });
-                dialog.showDialog( );
-            } else {
-                cp.show( );
-                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                            android.Manifest.permission.ACCESS_FINE_LOCATION
+                    }, REQUEST_PERMISSION);
+
+                } else {
+                    cp.show( );
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+                }
+            }else{
+                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    CustomDialog dialog = new CustomDialog(this);
+                    dialog.setDialogTitle("GPS가 꺼져있습니다.");
+                    dialog.setDialogContent("예를 누르면 설정창으로 이동합니다.");
+                    dialog.setDialogNo("아니요");
+                    dialog.setDialogYes("예");
+                    dialog.setDialogListener(new MyDialogListener( ) {
+                        @Override
+                        public void onPositiveClicked() {
+                            //GPS 설정화면으로 이동
+                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            startActivity(intent);
+                            return;
+                        }
+
+                        @Override
+                        public void onNegativeClicked() {
+                            return;
+                        }
+                    });
+                    dialog.showDialog( );
+                } else {
+                    cp.show( );
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+                }
             }
+
+
         });
 
 
         //Search fab init
         findViewById(R.id.fab_search).setOnClickListener(v -> {
             List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
-        // Start the autocomplete intent.
+            // Start the autocomplete intent.
             Intent intent = new Autocomplete.IntentBuilder(
                     AutocompleteActivityMode.OVERLAY, fields)
                     .setCountry("KOR")
@@ -232,9 +258,25 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
         });
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION:
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.i("TAG", "Permissions are granted");
+                    cp.show( );
+                    mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+                } else {
+                    return;
+                }
+                return;
+        }
+    }
+
 
     void showWebViewDialogAsUrl(String url) {
-        cp.show( );
         AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create( );
         WebView wv = new WebView(this);
         LinearLayout wrapper = new LinearLayout(this);
@@ -460,6 +502,7 @@ public class MainActivity extends AppCompatActivity implements MapView.POIItemEv
 
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+        cp.show( );
 
         for (MarkerInfo marker : centermarkers) {
             if (marker.getPlaceName( ).equals(mapPOIItem.getItemName( ))) {
